@@ -1,0 +1,8 @@
+[project]
+name = "teng"
+version = "0.1.0"
+description = "Terminal game engine"
+
+[build-system]
+requires = ["flit_core >= 3.4"]
+build-backend = "flit_core.buildapi"
