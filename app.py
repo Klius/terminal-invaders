@@ -2,7 +2,7 @@ import time
 import os
 from colorama import Fore, just_fix_windows_console
 from game.teng.screen import Screen
-from game.teng import vector2D
+from game.teng import vector2D, Clock
 from game.invaders import Player, EnemyPool
 
 if os.name == "nt":
@@ -19,12 +19,13 @@ XOUT: bool = False
 
 
 # CONST
-FPS = 10
+FPS = 60
 
 
 screen: Screen
 player: Player
 enemies: EnemyPool
+clock: Clock
 
 
 def clean():
@@ -35,17 +36,19 @@ def clean():
 
 
 def init():
-    global screen, player, enemies
+    global screen, player, enemies, clock
     screen = Screen(30, 20, space_char=" ")
     player = Player(position=vector2D(20, 18), height=1,
                     width=1, sprite=["▁☗▁", "███"])
     enemies = EnemyPool(sprite="A", max_enemies_row=10)
+    clock = Clock()
     game_loop()
 
 
 def game_loop():
-    global XOUT, key
+    global XOUT, key, clock
     while not XOUT:
+        clock.update()
         start = time.process_time_ns()
         key = read_input()
         update()
@@ -63,8 +66,8 @@ def update():
 
 
 def update_enemies():
-    global enemies, screen
-    enemies.update(screen.MAX_X)
+    global enemies, screen, clock
+    enemies.update(screen.MAX_X, clock.get_delta())
 
 
 def check_collisions():
@@ -73,7 +76,7 @@ def check_collisions():
         col_done = False
         for row in enemies.enemies:
             for e in row:
-                if bullet.position.x < e.position.x + e.width and bullet.position.x + bullet.width > e.position.x \
+                if not e.despawn and bullet.position.x < e.position.x + e.width and bullet.position.x + bullet.width > e.position.x \
                         and bullet.position.y < e.position.y + e.height and bullet.position.y + bullet.height > e.position.y:
                     bullet.despawn = True
                     e.despawn = True
