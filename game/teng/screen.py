@@ -9,7 +9,7 @@ class Screen():
     SPACE_CHAR: str
     screen_buffer: list
 
-    def __init__(self, x: int = 80, y: int = 80,space_char:str = " "):
+    def __init__(self, x: int = 80, y: int = 80, space_char: str = " "):
         """Create a screen of size x*y
 
         Args:
@@ -43,9 +43,13 @@ class Screen():
         """
         Print out the screen
         """
-        print("\n".join(self.screen_buffer))
+        print(f"╔{'═'*self.MAX_X}╗")
+        for idx in range(len(self.screen_buffer)):
+            print(f"║{self.screen_buffer[idx]}║")
+        # print("\n".join(self.screen_buffer))
+        print(f"╚{'═'*self.MAX_X}╝")
         # Return cursor up https://stackoverflow.com/questions/34828142/cmd-console-game-reduction-of-blinking
-        #print("\033[1;1H", end="")
+        # print("\033[1;1H", end="")
 
 
 # just_fix_windows_console()
@@ -70,4 +74,3 @@ class Screen():
 #     s.draw()
 
 #     time.sleep(0.0167)
-
