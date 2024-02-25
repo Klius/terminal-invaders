@@ -6,6 +6,7 @@ from copy import deepcopy
 class EnemyPool():
     sprite: list
     speed: int
+    dead: bool
     enemies: list[Enemy]
     rows: int
     max_enemies: int
@@ -19,6 +20,7 @@ class EnemyPool():
         self.rows = rows
         self.movement_cooldown = 0.5
         self._cooldown = self.movement_cooldown
+        self.dead = False
         pos = vector2D(0, 0)
         for row in range(rows):
             temp_list = []
@@ -34,13 +36,15 @@ class EnemyPool():
         updated_list = []
         self._cooldown -= delta*100
         for row in self.enemies:
+            dead_enemies = 0
             for enemy in row:
                 if self._cooldown <= 0:
                     enemy.update()
                 if enemy.despawn:
                     enemy.sprite = [" "]
-
-            updated_list.append(row)
+                    dead_enemies += 1
+            if dead_enemies != len(row):
+                updated_list.append(row)
 
         change_direction = False
         for row in self.enemies:
@@ -62,6 +66,8 @@ class EnemyPool():
         updated_list = list(
             filter(lambda row: len(row) != 0, updated_list))
         self.enemies = updated_list
+        if not self.enemies:
+            self.dead = True
 
     # def spawn(self, position: vector2D):
     #     if len(self.bullets) < self.MAX_BULLETS:

@@ -16,6 +16,7 @@ key = ""
 
 # States
 XOUT: bool = False
+CLEAR: bool = False
 
 
 # CONST
@@ -26,6 +27,7 @@ screen: Screen
 player: Player
 enemies: EnemyPool
 clock: Clock
+score: int
 
 
 def clean():
@@ -36,11 +38,12 @@ def clean():
 
 
 def init():
-    global screen, player, enemies, clock
+    global screen, player, enemies, clock, score
     screen = Screen(30, 20, space_char=" ")
     player = Player(position=vector2D(20, 18), height=1,
                     width=1, sprite=["▁☗▁", "███"])
     enemies = EnemyPool(sprite="A", max_enemies_row=10)
+    score = 0
     clock = Clock()
     game_loop()
 
@@ -71,9 +74,10 @@ def update_enemies():
 
 
 def check_collisions():
-    global player, enemies
+    global player, enemies, score
     for bullet in player.bullet_pool.bullets:
         col_done = False
+        x = 1
         for row in enemies.enemies:
             for e in row:
                 if not e.despawn and bullet.position.x < e.position.x + e.width and bullet.position.x + bullet.width > e.position.x \
@@ -81,9 +85,12 @@ def check_collisions():
                     bullet.despawn = True
                     e.despawn = True
                     col_done = True
+                    # FIXME this ain't working right
+                    score += 10*x
                     break
             if col_done:
                 break
+            x += 1
         if col_done:
             continue
 
@@ -122,7 +129,7 @@ def end_msg_box(msg: str, padding: int = 32):
 
 
 def draw():
-    global player, enemies
+    global player, enemies, score
     # Clear previous frame and draw next
     clean()
     screen.clear_buffer()
@@ -134,6 +141,7 @@ def draw():
         screen.add_sprite(bullet.position.x,
                           bullet.position.y, sprite=bullet.sprite)
     screen.draw()
+    print(score)
 
 
 try:
