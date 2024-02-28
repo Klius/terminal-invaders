@@ -77,7 +77,7 @@ def check_collisions():
     global player, enemies, score
     for bullet in player.bullet_pool.bullets:
         col_done = False
-        x = 1
+        x = len(enemies.enemies)
         for row in enemies.enemies:
             for e in row:
                 if not e.despawn and bullet.position.x < e.position.x + e.width and bullet.position.x + bullet.width > e.position.x \
@@ -90,7 +90,7 @@ def check_collisions():
                     break
             if col_done:
                 break
-            x += 1
+            x -= 1
         if col_done:
             continue
 
