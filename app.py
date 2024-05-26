@@ -1,5 +1,6 @@
 import time
 import os
+from enum import Enum
 from colorama import Fore, just_fix_windows_console
 from game.teng.screen import Screen
 from game.teng import vector2D, Clock
@@ -16,8 +17,17 @@ key = ""
 
 # States
 XOUT: bool = False
-CLEAR: bool = False
 
+# TODO IMPLEMENT LOSE/WIN CONDITIONS as well as reset the game
+
+
+class GAME_STATES(Enum):
+    PLAY = 1
+    WIN = 2
+    LOSE = 3
+
+
+GAME_STATE = GAME_STATES.PLAY
 
 # CONST
 FPS = 60
@@ -66,15 +76,26 @@ def update():
     update_player()
     check_collisions()
     update_enemies()
+    change_game_state()
+
+
+def change_game_state():
+    global GAME_STATE, enemies
+    if GAME_STATE == GAME_STATES.PLAY:
+        if enemies.dead:
+            GAME_STATE = GAME_STATES.LOSE
 
 
 def update_enemies():
-    global enemies, screen, clock
-    enemies.update(screen.MAX_X, clock.get_delta())
+    global enemies, screen, GAME_STATE
+    if GAME_STATE == GAME_STATES.PLAY:
+        enemies.update(screen.MAX_X, clock.get_delta())
 
 
 def check_collisions():
-    global player, enemies, score
+    global player, enemies, score, GAME_STATE
+    # if GAME_STATE != GAME_STATES.PLAY:
+    #     return
     for bullet in player.bullet_pool.bullets:
         col_done = False
         x = len(enemies.enemies)
@@ -96,7 +117,7 @@ def check_collisions():
 
 
 def update_player():
-    global key, XOUT, player
+    global key, XOUT, player, screen
 
     if key == 'x':
         XOUT = True
@@ -108,7 +129,7 @@ def update_player():
     elif key == 'a':
         player.move_left = True
 
-    player.update()
+    player.update(screen.MAX_X)
 
 
 def length_ansi_string(string: str):
@@ -133,13 +154,15 @@ def draw():
     # Clear previous frame and draw next
     clean()
     screen.clear_buffer()
-    screen.add_sprite(player.position.x, player.position.y, player.sprite)
-    for row in enemies.enemies:
-        for enemy in row:
-            screen.add_sprite(enemy.position.x, enemy.position.y, enemy.sprite)
-    for bullet in player.bullet_pool.bullets:
-        screen.add_sprite(bullet.position.x,
-                          bullet.position.y, sprite=bullet.sprite)
+    if GAME_STATE == GAME_STATES.PLAY:
+        screen.add_sprite(player.position.x, player.position.y, player.sprite)
+        for row in enemies.enemies:
+            for enemy in row:
+                screen.add_sprite(enemy.position.x,
+                                  enemy.position.y, enemy.sprite)
+        for bullet in player.bullet_pool.bullets:
+            screen.add_sprite(bullet.position.x,
+                              bullet.position.y, sprite=bullet.sprite)
     screen.draw()
     print(score)
 
